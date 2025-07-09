@@ -19,37 +19,37 @@ const categories = {
     name: 'Base',
     maxSelections: 1,
     items: [
-      { id: 'arroz', name: 'Arroz Branco', description: 'Arroz soltinho e temperado' },
-      { id: 'arroz_integral', name: 'Arroz Integral', description: 'Opção mais saudável e nutritiva' },
+      { id: 'arroz', name: 'Arroz Branco', description: 'Arroz soltinho e temperado', image: 'https://images.unsplash.com/photo-1586201375761-83865001e31c?w=400&h=300&fit=crop' },
+      { id: 'arroz_integral', name: 'Arroz Integral', description: 'Opção mais saudável e nutritiva', image: 'https://images.unsplash.com/photo-1603833665858-e61d17a86224?w=400&h=300&fit=crop' },
     ]
   },
   proteina: {
     name: 'Proteína',
     maxSelections: 1,
     items: [
-      { id: 'frango_grelhado', name: 'Frango Grelhado', description: 'Peito de frango temperado e grelhado' },
-      { id: 'carne_moida', name: 'Carne Moída', description: 'Carne moída refogada com temperos' },
-      { id: 'peixe', name: 'Peixe Grelhado', description: 'Filé de peixe grelhado com ervas' },
+      { id: 'frango_grelhado', name: 'Frango Grelhado', description: 'Peito de frango temperado e grelhado', image: 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=400&h=300&fit=crop' },
+      { id: 'carne_moida', name: 'Carne Moída', description: 'Carne moída refogada com temperos', image: 'https://images.unsplash.com/photo-1603360946369-dc9bb6258143?w=400&h=300&fit=crop' },
+      { id: 'peixe', name: 'Peixe Grelhado', description: 'Filé de peixe grelhado com ervas', image: 'https://images.unsplash.com/photo-1544943910-4c1dc44aab44?w=400&h=300&fit=crop' },
     ]
   },
   acompanhamentos: {
     name: 'Acompanhamentos',
     maxSelections: 2,
     items: [
-      { id: 'feijao', name: 'Feijão Carioca', description: 'Feijão temperado tradicional' },
-      { id: 'feijao_preto', name: 'Feijão Preto', description: 'Feijão preto cremoso' },
-      { id: 'farofa', name: 'Farofa', description: 'Farofa crocante com bacon' },
-      { id: 'batata_frita', name: 'Batata Frita', description: 'Batatas douradas e crocantes' },
+      { id: 'feijao', name: 'Feijão Carioca', description: 'Feijão temperado tradicional', image: 'https://images.unsplash.com/photo-1553979459-d2229ba7433a?w=400&h=300&fit=crop' },
+      { id: 'feijao_preto', name: 'Feijão Preto', description: 'Feijão preto cremoso', image: 'https://images.unsplash.com/photo-1605032105622-18d26dcd4500?w=400&h=300&fit=crop' },
+      { id: 'farofa', name: 'Farofa', description: 'Farofa crocante com bacon', image: 'https://images.unsplash.com/photo-1574663253572-66a8c2b9d3f8?w=400&h=300&fit=crop' },
+      { id: 'batata_frita', name: 'Batata Frita', description: 'Batatas douradas e crocantes', image: 'https://images.unsplash.com/photo-1639024471283-03518883512d?w=400&h=300&fit=crop' },
     ]
   },
   salada: {
     name: 'Salada',
     maxSelections: 3,
     items: [
-      { id: 'alface', name: 'Alface', description: 'Folhas frescas e crocantes' },
-      { id: 'tomate', name: 'Tomate', description: 'Tomates frescos em cubos' },
-      { id: 'cenoura', name: 'Cenoura Ralada', description: 'Cenoura fresca ralada' },
-      { id: 'pepino', name: 'Pepino', description: 'Pepino em fatias finas' },
+      { id: 'alface', name: 'Alface', description: 'Folhas frescas e crocantes', image: 'https://images.unsplash.com/photo-1556909045-f9c7b1c8b9d7?w=400&h=300&fit=crop' },
+      { id: 'tomate', name: 'Tomate', description: 'Tomates frescos em cubos', image: 'https://images.unsplash.com/photo-1546094096-0df4bcaaa337?w=400&h=300&fit=crop' },
+      { id: 'cenoura', name: 'Cenoura Ralada', description: 'Cenoura fresca ralada', image: 'https://images.unsplash.com/photo-1598170845058-32b9d6a5da37?w=400&h=300&fit=crop' },
+      { id: 'pepino', name: 'Pepino', description: 'Pepino em fatias finas', image: 'https://images.unsplash.com/photo-1552944150-6dd1180e5999?w=400&h=300&fit=crop' },
     ]
   }
 }
@@ -165,18 +165,19 @@ const Index = () => {
                         </CardTitle>
                       </CardHeader>
                       <CardContent>
-                        <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
-                          {category.items.map((item) => (
-                            <FoodCard
-                              key={item.id}
-                              name={item.name}
-                              description={item.description}
-                              variant="selectable"
-                              selected={selectedItems[categoryId]?.includes(item.id) || false}
-                              onSelect={() => handleItemSelect(categoryId, item.id)}
-                            />
-                          ))}
-                        </div>
+                         <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+                           {category.items.map((item) => (
+                             <FoodCard
+                               key={item.id}
+                               name={item.name}
+                               description={item.description}
+                               image={item.image}
+                               variant="selectable"
+                               selected={selectedItems[categoryId]?.includes(item.id) || false}
+                               onSelect={() => handleItemSelect(categoryId, item.id)}
+                             />
+                           ))}
+                         </div>
                       </CardContent>
                     </Card>
                   ))}
