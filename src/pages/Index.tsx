@@ -2,6 +2,7 @@ import { useState } from "react"
 import { Header } from "@/components/layout/header"
 import { HeroSection } from "@/components/sections/hero-section"
 import { FoodCard } from "@/components/ui/food-card"
+import { IngredientListItem } from "@/components/ui/ingredient-list-item"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -165,18 +166,24 @@ const Index = () => {
                         </CardTitle>
                       </CardHeader>
                       <CardContent>
-                         <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
-                           {category.items.map((item) => (
-                             <FoodCard
-                               key={item.id}
-                               name={item.name}
-                               description={item.description}
-                               image={item.image}
-                               variant="selectable"
-                               selected={selectedItems[categoryId]?.includes(item.id) || false}
-                               onSelect={() => handleItemSelect(categoryId, item.id)}
-                             />
-                           ))}
+                         <div className="space-y-2">
+                           {category.items.map((item) => {
+                             const currentSelections = selectedItems[categoryId] || []
+                             const isSelected = currentSelections.includes(item.id)
+                             const isDisabled = !isSelected && currentSelections.length >= category.maxSelections
+                             
+                             return (
+                               <IngredientListItem
+                                 key={item.id}
+                                 name={item.name}
+                                 description={item.description}
+                                 image={item.image}
+                                 selected={isSelected}
+                                 disabled={isDisabled}
+                                 onSelect={() => handleItemSelect(categoryId, item.id)}
+                               />
+                             )
+                           })}
                          </div>
                       </CardContent>
                     </Card>
