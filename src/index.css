@@ -125,3 +125,95 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Kanban Board - Cards otimizados para desktop */
+@layer components {
+  .kanban-cards-container {
+    @apply space-y-3;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .kanban-card-uniform {
+    height: 280px !important; /* altura maior para desktop */
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    transition: all 0.2s ease-in-out;
+  }
+  
+  /* Responsividade - ajustar altura por tamanho de tela */
+  @media (max-width: 768px) {
+    .kanban-card-uniform {
+      height: 220px !important; /* menor em mobile */
+    }
+  }
+  
+  @media (min-width: 1024px) {
+    .kanban-card-uniform {
+      height: 320px !important; /* maior em desktop */
+    }
+  }
+  
+  @media (min-width: 1280px) {
+    .kanban-card-uniform {
+      height: 350px !important; /* ainda maior em telas grandes */
+    }
+  }
+  
+  .kanban-card-uniform .card-content {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    padding: 1rem;
+  }
+  
+  .kanban-card-uniform .card-body {
+    flex: 1;
+    overflow-y: auto;
+    min-height: 0;
+    padding-right: 4px; /* espaço para scrollbar */
+  }
+  
+  .kanban-card-uniform .card-actions {
+    margin-top: 0.75rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid hsl(var(--border));
+    flex-shrink: 0;
+  }
+  
+  /* Scrollbar personalizada para desktop */
+  .kanban-card-uniform .card-body::-webkit-scrollbar {
+    width: 4px;
+  }
+  
+  .kanban-card-uniform .card-body::-webkit-scrollbar-track {
+    background: hsl(var(--muted));
+    border-radius: 2px;
+  }
+  
+  .kanban-card-uniform .card-body::-webkit-scrollbar-thumb {
+    background: hsl(var(--muted-foreground) / 0.3);
+    border-radius: 2px;
+  }
+  
+  .kanban-card-uniform .card-body::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--muted-foreground) / 0.5);
+  }
+  
+  /* Truncar observações longas */
+  .kanban-notes {
+    display: -webkit-box;
+    -webkit-line-clamp: 3; /* mais linhas em desktop */
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  /* Hover effects para desktop */
+  .kanban-card-uniform:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px -8px hsl(var(--foreground) / 0.15);
+  }
+}

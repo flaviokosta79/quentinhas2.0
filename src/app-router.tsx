@@ -7,6 +7,7 @@ import { ROUTES } from './shared/constants';
 // Import different applications
 import Index from './pages/Index';
 import RestaurantPage from './pages/RestaurantPage';
+import RestaurantAdminApp from './apps/restaurant-admin/RestaurantAdminApp';
 // import AdminApp from './apps/admin/AdminApp';
 // import OnboardingApp from './apps/onboarding/OnboardingApp';
 
@@ -25,7 +26,7 @@ const ErrorBoundary = ({ children }: { children: React.ReactNode }) => <>{childr
  * based on the current subdomain and tenant context
  */
 function AppRouter() {
-  const [appType, setAppType] = useState<'landing' | 'restaurant' | 'admin' | 'onboarding' | null>(null);
+  const [appType, setAppType] = useState<'landing' | 'restaurant' | 'restaurant-admin' | 'admin' | 'onboarding' | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -42,8 +43,13 @@ function AppRouter() {
         } else if (subdomain === 'onboarding' || subdomain === 'cadastro') {
           setAppType('onboarding');
         } else {
-          // Regular tenant subdomain - restaurant app
-          setAppType('restaurant');
+          // Regular tenant subdomain - check if it's admin dashboard
+          if (pathname.startsWith('/admin') || pathname.startsWith('/dashboard')) {
+            setAppType('restaurant-admin');
+          } else {
+            // Regular restaurant storefront
+            setAppType('restaurant');
+          }
         }
       } else {
         // Main domain - check path for admin routes
@@ -87,8 +93,8 @@ function AppRouter() {
 function AppContent({ appType }: { appType: string | null }) {
   const { tenant, isLoading, error } = useTenant();
 
-  // For restaurant app, we need a valid tenant
-  if (appType === 'restaurant') {
+  // For restaurant and restaurant-admin apps, we need a valid tenant
+  if (appType === 'restaurant' || appType === 'restaurant-admin') {
     if (isLoading) {
       return <LoadingSpinner />;
     }
@@ -108,6 +114,9 @@ function AppContent({ appType }: { appType: string | null }) {
     
     case 'restaurant':
       return <RestaurantApp />;
+    
+    case 'restaurant-admin':
+      return <RestaurantAdminApp tenant={tenant!} />;
     
     case 'admin':
       return <AdminApp />;

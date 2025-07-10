@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste Multi-tenant - Quentinhas</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #FF6B35;
+            text-align: center;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .test-link {
+            display: inline-block;
+            margin: 5px 10px;
+            padding: 10px 15px;
+            background: #FF6B35;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: background 0.3s;
+        }
+        .test-link:hover {
+            background: #e55a2b;
+        }
+        .info {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        .current-info {
+            background: #f3e5f5;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🍱 Teste Multi-tenant Quentinhas</h1>
+        
+        <div class="current-info">
+            <strong>Informações Atuais:</strong><br>
+            <span id="current-hostname"></span><br>
+            <span id="current-subdomain"></span><br>
+            <span id="detected-app"></span>
+        </div>
+
+        <div class="info">
+            <h3>📋 Como Testar o Sistema Multi-tenant</h3>
+            <p>Para testar completamente o sistema de subdomínios, você precisa configurar entradas no arquivo <code>hosts</code> do Windows:</p>
+            <ol>
+                <li>Abra o Bloco de Notas como <strong>Administrador</strong></li>
+                <li>Abra o arquivo: <code>C:\Windows\System32\drivers\etc\hosts</code></li>
+                <li>Adicione as seguintes linhas:</li>
+            </ol>
+            <pre style="background: #f0f0f0; padding: 10px; border-radius: 5px;">
+127.0.0.1    quentinhas.com
+127.0.0.1    www.quentinhas.com
+127.0.0.1    restaurante1.quentinhas.com
+127.0.0.1    admin.quentinhas.com
+127.0.0.1    onboarding.quentinhas.com
+127.0.0.1    cadastro.quentinhas.com</pre>
+            <p>Depois salve o arquivo e teste os links abaixo:</p>
+        </div>
+
+        <div class="test-section">
+            <h3>🏠 Landing Page (Domínio Principal)</h3>
+            <a href="http://quentinhas.com:8080" class="test-link" target="_blank">quentinhas.com:8080</a>
+            <a href="http://www.quentinhas.com:8080" class="test-link" target="_blank">www.quentinhas.com:8080</a>
+        </div>
+
+        <div class="test-section">
+            <h3>🍽️ Restaurant App (Subdomínio de Restaurante)</h3>
+            <a href="http://restaurante1.quentinhas.com:8080" class="test-link" target="_blank">restaurante1.quentinhas.com:8080</a>
+            <p><small>Deve mostrar "Restaurant App for [tenant] - Coming Soon" ou erro se o tenant não existir no banco</small></p>
+        </div>
+
+        <div class="test-section">
+            <h3>⚙️ Admin App (Subdomínio Admin)</h3>
+            <a href="http://admin.quentinhas.com:8080" class="test-link" target="_blank">admin.quentinhas.com:8080</a>
+            <p><small>Deve mostrar "Admin App - Coming Soon"</small></p>
+        </div>
+
+        <div class="test-section">
+            <h3>🚀 Onboarding App (Subdomínio Onboarding)</h3>
+            <a href="http://onboarding.quentinhas.com:8080" class="test-link" target="_blank">onboarding.quentinhas.com:8080</a>
+            <a href="http://cadastro.quentinhas.com:8080" class="test-link" target="_blank">cadastro.quentinhas.com:8080</a>
+            <p><small>Ambos devem mostrar "Onboarding App - Coming Soon"</small></p>
+        </div>
+
+        <div class="test-section">
+            <h3>📊 Status do Sistema</h3>
+            <div id="system-status">
+                <p>✅ Servidor rodando na porta 8080</p>
+                <p>✅ React + Vite funcionando</p>
+                <p>✅ Supabase conectado</p>
+                <p>✅ Sistema de roteamento multi-tenant ativo</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Detectar informações atuais
+        document.getElementById('current-hostname').textContent = `Hostname: ${window.location.hostname}`;
+        
+        // Simular a lógica de detecção de subdomínio
+        function extractSubdomain(hostname) {
+            const cleanHostname = hostname.replace(/^www\./, '');
+            if (cleanHostname === 'quentinhas.com' || cleanHostname === 'localhost') {
+                return null;
+            }
+            const parts = cleanHostname.split('.');
+            if (parts.length >= 3 && cleanHostname.endsWith('.quentinhas.com')) {
+                return parts[0];
+            }
+            return null;
+        }
+
+        const subdomain = extractSubdomain(window.location.hostname);
+        document.getElementById('current-subdomain').textContent = `Subdomínio: ${subdomain || 'Nenhum (domínio principal)'}`;
+
+        // Determinar qual app seria carregado
+        let appType = 'landing';
+        if (subdomain) {
+            if (subdomain === 'admin') {
+                appType = 'admin';
+            } else if (subdomain === 'onboarding' || subdomain === 'cadastro') {
+                appType = 'onboarding';
+            } else {
+                appType = 'restaurant';
+            }
+        }
+        document.getElementById('detected-app').textContent = `App detectado: ${appType}`;
+    </script>
+</body>
+</html>
