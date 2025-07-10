@@ -4,15 +4,16 @@ import { AppProviders, useTenant } from './shared/contexts';
 import { extractSubdomain, isTenantDomain } from './services/tenant/tenant-resolver';
 import { ROUTES } from './shared/constants';
 
-// Import different applications (will be created later)
-// import LandingApp from './apps/landing/LandingApp';
-// import RestaurantApp from './apps/restaurant/RestaurantApp';
+// Import different applications
+import Index from './pages/Index';
+import RestaurantPage from './pages/RestaurantPage';
 // import AdminApp from './apps/admin/AdminApp';
 // import OnboardingApp from './apps/onboarding/OnboardingApp';
 
-// Temporary placeholder components
-const LandingApp = () => <div>Landing App - Coming Soon</div>;
-const RestaurantApp = ({ tenant }: { tenant: { name: string } }) => <div>Restaurant App for {tenant.name} - Coming Soon</div>;
+// Use the original Index page as Landing App
+const LandingApp = Index;
+// Use the new RestaurantPage for tenant subdomains
+const RestaurantApp = RestaurantPage;
 const AdminApp = () => <div>Admin App - Coming Soon</div>;
 const OnboardingApp = () => <div>Onboarding App - Coming Soon</div>;
 
@@ -106,7 +107,7 @@ function AppContent({ appType }: { appType: string | null }) {
       return <LandingApp />;
     
     case 'restaurant':
-      return <RestaurantApp tenant={tenant!} />;
+      return <RestaurantApp />;
     
     case 'admin':
       return <AdminApp />;

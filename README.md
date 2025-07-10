@@ -1,290 +1,307 @@
-# 🍱 Quentinhas Express
+# 🍱 Quentinhas - SaaS Multi-Tenant Food Delivery Platform
 
-Uma aplicação web moderna para delivery de quentinhas personalizáveis, desenvolvida com React, TypeScript e Supabase.
+Uma plataforma SaaS B2B2C multi-tenant completa para delivery de comida, construída com React, TypeScript, Supabase e arquitetura moderna.
 
-![Quentinhas Express](src/assets/hero-quentinha.jpg)
+![Quentinhas Platform](src/assets/hero-quentinha.jpg)
 
-## 📋 Visão Geral
+## 🎯 Visão Geral
 
-**Quentinhas Express** é uma plataforma de delivery focada em quentinhas customizáveis, onde os usuários podem montar suas refeições escolhendo entre diferentes bases, proteínas, acompanhamentos e saladas. A aplicação oferece uma experiência intuitiva e responsiva, com design inspirado nos melhores apps de delivery brasileiros.
+O **Quentinhas** é uma **plataforma SaaS multi-tenant** que permite que múltiplos restaurantes operem de forma independente com isolamento completo de dados, cada um com seu próprio subdomínio e configurações personalizadas.
 
-### ✨ Funcionalidades Principais
+### 🏗️ Arquitetura Multi-Tenant
 
-- 🍽️ **Montagem Personalizada**: Sistema completo de customização de quentinhas
-- 📱 **Design Responsivo**: Interface adaptativa para desktop e mobile
-- 🛒 **Carrinho Inteligente**: Validação automática e cálculo de preços
-- 🎨 **Design System**: Interface consistente com tema brasileiro
-- ⚡ **Performance**: Carregamento rápido com Vite e React Query
+- **Isolamento por Subdomínio**: `restaurante1.quentinhas.com`, `restaurante2.quentinhas.com`
+- **Row Level Security (RLS)**: Isolamento de dados no nível do banco
+- **Temas Dinâmicos**: Cada tenant pode personalizar cores, logo e fontes
+- **Configurações Independentes**: Horários, taxas, métodos de pagamento por tenant
 
-## 🚀 Tecnologias
+## 🚀 Funcionalidades
 
-### Frontend
-- **React 18** - Biblioteca principal
-- **TypeScript** - Tipagem estática
+### 🏪 **Para Restaurantes (Tenants)**
+- 🍕 Gestão completa de cardápio e categorias
+- 🛒 Sistema de pedidos em tempo real
+- 🎨 Personalização de tema e branding
+- ⏰ Configuração de horários de funcionamento
+- 💰 Gestão de preços e taxas de entrega
+- 📊 Dashboard administrativo
+
+### 👥 **Para Clientes**
+- 🔍 Navegação por cardápios
+- 🛒 Carrinho de compras intuitivo
+- 📱 Interface responsiva
+- 💳 Múltiplos métodos de pagamento
+- 📍 Sistema de entrega
+
+### 🏢 **Para a Plataforma (SaaS)**
+- 🏗️ Onboarding automatizado de novos tenants
+- 💼 Gestão de planos e assinaturas
+- 📈 Analytics e métricas globais
+- 🔧 Configurações de sistema
+
+## 🛠️ Stack Tecnológica
+
+### **Frontend**
+- **React 18** - Framework principal
+- **TypeScript** - Type safety
 - **Vite** - Build tool e dev server
-- **Tailwind CSS** - Framework CSS utilitário
-- **shadcn/ui** - Componentes UI modernos
+- **Tailwind CSS** - Styling
+- **React Query** - State management e cache
+- **React Router** - Roteamento
 
-### Backend & Dados
+### **Backend & Database**
 - **Supabase** - Backend as a Service
-- **React Query** - Gerenciamento de estado servidor
-- **React Router DOM** - Roteamento
+- **PostgreSQL** - Banco de dados principal
+- **Row Level Security** - Isolamento de dados
+- **Real-time subscriptions** - Updates em tempo real
 
-### Ferramentas
-- **Bun** - Package manager rápido
-- **ESLint** - Linting de código
-- **PostCSS** - Processamento CSS
+### **Infraestrutura**
+- **Subdomain routing** - Isolamento por tenant
+- **Multi-tenant architecture** - Arquitetura escalável
+- **Environment-based config** - Configuração flexível
 
-## 🏗️ Arquitetura
+## 🏃‍♂️ Início Rápido
 
-```mermaid
-graph TB
-    subgraph "Frontend Layer"
-        A[React App] --> B[React Router]
-        A --> C[React Query]
-        A --> D[shadcn/ui Components]
-    end
-    
-    subgraph "UI Layer"
-        E[Pages] --> F[Layout Components]
-        E --> G[Section Components]
-        E --> H[UI Components]
-    end
-    
-    subgraph "Data Layer"
-        I[Supabase Client] --> J[Database]
-        I --> K[Authentication]
-        I --> L[Real-time]
-    end
-    
-    subgraph "Styling Layer"
-        M[Tailwind CSS] --> N[Custom Design System]
-        M --> O[Responsive Design]
-    end
-    
-    A --> E
-    C --> I
-    D --> H
-    N --> H
+### Pré-requisitos
+
+- Node.js 18+
+- npm ou yarn
+- Conta no Supabase
+
+### Configuração
+
+1. **Clone o repositório:**
+```bash
+git clone https://github.com/seu-usuario/quentinhas.git
+cd quentinhas
 ```
+
+2. **Instale as dependências:**
+```bash
+npm install
+```
+
+3. **Configure as variáveis de ambiente:**
+```bash
+cp .env.example .env
+```
+
+Edite o `.env` com suas credenciais do Supabase:
+```env
+VITE_SUPABASE_URL=sua_url_do_supabase
+VITE_SUPABASE_ANON_KEY=sua_chave_anonima
+```
+
+4. **Execute as migrações do banco:**
+```bash
+# As migrações estão documentadas em MIGRATION_PLAN.md
+# Execute-as no seu painel do Supabase ou via CLI
+```
+
+5. **Inicie o servidor de desenvolvimento:**
+```bash
+npm run dev
+```
+
+6. **Acesse a aplicação:**
+- **Landing Page**: `http://localhost:8080`
+- **Tenant 1**: `http://quentinhas-express.localhost:8080`
+- **Tenant 2**: `http://restaurante1.localhost:8080`
 
 ## 📁 Estrutura do Projeto
 
 ```
 src/
-├── components/          # Componentes reutilizáveis
-│   ├── layout/         # Componentes de layout
-│   │   └── header.tsx  # Cabeçalho principal
-│   ├── sections/       # Seções específicas
-│   │   └── hero-section.tsx # Seção hero
-│   └── ui/            # Componentes UI base
-│       ├── food-card.tsx # Card de produtos
-│       └── ingredient-list-item.tsx # Item de ingrediente
-├── pages/             # Páginas da aplicação
-│   ├── Index.tsx      # Página principal
-│   └── NotFound.tsx   # Página 404
-├── hooks/             # Custom hooks
-├── integrations/      # Integrações externas
-│   └── supabase/     # Cliente Supabase
-├── lib/              # Utilitários
-└── assets/           # Recursos estáticos
+├── apps/                   # Aplicações modulares
+│   ├── landing/           # Landing page principal
+│   ├── restaurant/        # App do restaurante (storefront)
+│   ├── admin/            # Painel administrativo
+│   └── onboarding/       # Processo de cadastro
+├── shared/               # Código compartilhado
+│   ├── components/       # Componentes reutilizáveis
+│   ├── contexts/         # React contexts
+│   ├── types/           # Definições TypeScript
+│   ├── constants/       # Constantes e configurações
+│   └── utils/           # Funções utilitárias
+├── services/            # Serviços e integrações
+│   ├── data/           # Serviços de dados
+│   ├── tenant/         # Resolução de tenants
+│   └── theme/          # Sistema de temas
+├── pages/              # Páginas principais
+└── hooks/              # Custom hooks
 ```
 
-## 🎨 Sistema de Design
-
-### Paleta de Cores
-```css
-/* Cores inspiradas no delivery brasileiro */
---primary: 18 100% 60%;        /* Laranja vibrante */
---secondary: 0 85% 60%;        /* Vermelho quente */
---accent: 45 95% 60%;          /* Amarelo dourado */
---muted: 20 15% 95%;           /* Neutro quente */
-```
-
-### Componentes Especializados
-- **FoodCard**: Cards para exibição de produtos alimentícios
-- **IngredientListItem**: Lista interativa de ingredientes
-- **Header**: Cabeçalho com informações do restaurante
-- **HeroSection**: Seção principal com call-to-action
-
-## 🛠️ Instalação e Uso
-
-### Pré-requisitos
-- Node.js 18+ ou Bun
-- Git
-
-### Instalação
-
-```bash
-# Clone o repositório
-git clone <YOUR_GIT_URL>
-cd quentinhas
-
-# Instale as dependências (com Bun)
-bun install
-
-# Ou com npm
-npm install
-
-# Inicie o servidor de desenvolvimento
-bun dev
-# ou
-npm run dev
-```
-
-### Scripts Disponíveis
-
-```bash
-# Desenvolvimento
-bun dev          # Inicia servidor de desenvolvimento
-npm run dev
-
-# Build
-bun run build    # Build para produção
-npm run build
-
-# Linting
-bun run lint     # Executa ESLint
-npm run lint
-
-# Preview
-bun run preview  # Preview da build
-npm run preview
-```
-
-## 🎯 Funcionalidades Implementadas
-
-### Sistema de Montagem de Quentinha
-
-#### 1. Seleção de Tamanho
-- **Quentinha P** - R$ 15,00 - Ideal para matar a fome
-- **Quentinha M** - R$ 18,00 - Refeição completa
-- **Quentinha G** - R$ 20,00 - Para bom apetite
-
-#### 2. Categorias de Ingredientes
-
-**Base (escolha 1):**
-- Arroz Branco
-- Arroz Integral
-
-**Proteína (escolha 1):**
-- Frango Grelhado
-- Carne Moída
-- Peixe Grelhado
-
-**Acompanhamentos (até 2):**
-- Feijão Carioca
-- Feijão Preto
-- Farofa
-- Batata Frita
-
-**Salada (até 3):**
-- Alface
-- Tomate
-- Cenoura Ralada
-- Pepino
-
-### Interface e UX
-
-- **Fluxo Guiado**: Steps numerados para montagem
-- **Validação Inteligente**: Verificação de seleções obrigatórias
-- **Feedback Visual**: Animações e estados visuais
-- **Responsividade**: Adaptação automática para mobile/desktop
-
-## 🔍 Arquitetura Técnica
-
-### Padrões Implementados
-
-1. **Component-Based Architecture**: Separação clara de responsabilidades
-2. **Feature-Based Organization**: Agrupamento lógico por funcionalidade
-3. **Design System**: Tokens consistentes e reutilizáveis
-4. **Type Safety**: TypeScript em toda a aplicação
-
-### Gerenciamento de Estado
-
-```typescript
-// Estado local para montagem de quentinha
-const [selectedSize, setSelectedSize] = useState<string>('')
-const [selectedItems, setSelectedItems] = useState<Record<string, string[]>>({})
-const [cartCount, setCartCount] = useState(0)
-```
-
-### Integração Supabase
-
-- **Cliente configurado**: Autenticação e persistência
-- **Tipos TypeScript**: Tipagem automática do banco
-- **Real-time ready**: Preparado para funcionalidades em tempo real
-
-## 📈 Roadmap de Desenvolvimento
+## 🏗️ Arquitetura Multi-Tenant
 
 ```mermaid
-gantt
-    title Roadmap Quentinhas Express
-    dateFormat  YYYY-MM-DD
-    section Fase 1 - Fundação
-    Implementar testes           :2025-01-10, 7d
-    Adicionar validação         :2025-01-17, 5d
-    Melhorar estado global      :2025-01-22, 7d
+graph TB
+    subgraph "Client Layer"
+        A[Browser] --> B[Subdomain Router]
+        B --> C[Tenant Context]
+    end
     
-    section Fase 2 - Backend
-    Sistema de pedidos          :2025-01-29, 14d
-    Autenticação               :2025-02-12, 10d
-    Integração pagamentos      :2025-02-22, 14d
+    subgraph "Frontend Layer"
+        C --> D[React App]
+        D --> E[React Query]
+        D --> F[Theme Provider]
+    end
     
-    section Fase 3 - Avançado
-    PWA e offline              :2025-03-08, 10d
-    Admin panel                :2025-03-18, 14d
-    Analytics e métricas       :2025-04-01, 7d
+    subgraph "Backend Layer"
+        E --> G[Supabase Client]
+        G --> H[Row Level Security]
+        H --> I[PostgreSQL]
+    end
+    
+    subgraph "Data Isolation"
+        I --> J[Tenant 1 Data]
+        I --> K[Tenant 2 Data]
+        I --> L[Tenant N Data]
+    end
+    
+    subgraph "Tenant Resolution"
+        B --> M[Extract Subdomain]
+        M --> N[Resolve Tenant]
+        N --> O[Load Configuration]
+        O --> F
+    end
 ```
 
-## 🚀 Próximas Funcionalidades
+## 📚 Documentação
 
-### Em Desenvolvimento
+- **[ARCHITECTURE.md](ARCHITECTURE.md)** - Arquitetura detalhada do sistema
+- **[MIGRATION_PLAN.md](MIGRATION_PLAN.md)** - Plano de migração para multi-tenant
+- **[IMPLEMENTATION_GUIDE.md](IMPLEMENTATION_GUIDE.md)** - Guia de implementação
+- **[PROJECT_ROADMAP.md](PROJECT_ROADMAP.md)** - Roadmap do projeto
+
+## 🔧 Scripts Disponíveis
+
+```bash
+npm run dev          # Servidor de desenvolvimento
+npm run build        # Build para produção
+npm run preview      # Preview do build
+npm run lint         # Executar ESLint
+npm run type-check   # Verificação de tipos
+```
+
+## 🌐 Ambientes
+
+### Desenvolvimento
+- **URL Base**: `localhost:8080`
+- **Tenants**: `{tenant}.localhost:8080`
+
+### Produção
+- **URL Base**: `quentinhas.com`
+- **Tenants**: `{tenant}.quentinhas.com`
+
+## 🔐 Segurança
+
+- **Row Level Security (RLS)** habilitado em todas as tabelas
+- **Políticas de acesso** por tenant
+- **Validação de dados** no frontend e backend
+- **Sanitização** de inputs do usuário
+
+## 📊 Banco de Dados
+
+### Estrutura Multi-Tenant
+
+```sql
+-- Tabela principal de tenants
+CREATE TABLE tenants (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  slug VARCHAR UNIQUE NOT NULL,
+  name VARCHAR NOT NULL,
+  email VARCHAR NOT NULL,
+  status VARCHAR DEFAULT 'active',
+  plan VARCHAR DEFAULT 'starter',
+  settings JSONB DEFAULT '{}',
+  theme JSONB DEFAULT '{}',
+  created_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Políticas RLS para isolamento
+CREATE POLICY tenant_isolation ON products
+  FOR ALL USING (tenant_id = current_tenant_id());
+```
+
+### Migrações Executadas
+
+✅ **Migration 1**: Estrutura base multi-tenant  
+✅ **Migration 2**: Tabelas de usuários e autenticação  
+✅ **Migration 3**: Sistema de produtos e categorias  
+✅ **Migration 4**: Sistema de pedidos  
+✅ **Migration 5**: Sistema de assinaturas  
+✅ **Migration 6**: Dados de exemplo para desenvolvimento  
+
+## 🎨 Sistema de Temas
+
+### Personalização por Tenant
+
+```typescript
+interface TenantTheme {
+  colors: {
+    primary: string;
+    secondary: string;
+    accent: string;
+    background: string;
+  };
+  logo: string;
+  fonts: {
+    primary: string;
+    secondary: string;
+  };
+}
+```
+
+### Aplicação Dinâmica
+
+- CSS Variables atualizadas em tempo real
+- Suporte a temas dark/light
+- Personalização completa de branding
+
+## 📈 Monitoramento
+
+- **Logs estruturados** para debugging
+- **Métricas de performance** via Supabase
+- **Error tracking** integrado
+- **Analytics** de uso por tenant
+
+## 🚀 Roadmap
+
+### ✅ **Fase 1 - Fundação Multi-Tenant (Concluída)**
+- [x] Arquitetura multi-tenant
+- [x] Isolamento de dados com RLS
+- [x] Roteamento por subdomínio
+- [x] Sistema de temas dinâmicos
+
+### 🔄 **Fase 2 - Funcionalidades Avançadas (Em Progresso)**
 - [ ] Sistema completo de pedidos
-- [ ] Autenticação de usuários
 - [ ] Integração com pagamentos
-- [ ] Tracking de pedidos em tempo real
-- [ ] Painel administrativo
+- [ ] Notificações em tempo real
+- [ ] Dashboard administrativo
 
-### Melhorias Técnicas
-- [ ] Testes unitários e de integração
-- [ ] PWA (Progressive Web App)
-- [ ] SEO e meta tags
-- [ ] Otimização de performance
-- [ ] Modo offline
+### 📋 **Fase 3 - Escalabilidade (Planejada)**
+- [ ] Sistema de onboarding automatizado
+- [ ] Analytics avançados
+- [ ] API pública para integrações
+- [ ] Mobile app
 
-## 🎨 Design e UX
+## 🤝 Contribuindo
 
-### Princípios de Design
-- **Brasileiro**: Cores e elementos familiares ao público brasileiro
-- **Intuitivo**: Fluxo simples e direto
-- **Responsivo**: Funciona perfeitamente em qualquer dispositivo
-- **Acessível**: Seguindo padrões de acessibilidade web
-
-### Animações e Interações
-- Transições suaves com `cubic-bezier`
-- Animações de entrada (`fade-in`, `scale-in`)
-- Feedback visual em interações
-- Estados de loading e erro
-
-## 🤝 Contribuição
-
-1. Fork o projeto
-2. Crie uma branch para sua feature (`git checkout -b feature/AmazingFeature`)
-3. Commit suas mudanças (`git commit -m 'Add some AmazingFeature'`)
-4. Push para a branch (`git push origin feature/AmazingFeature`)
+1. Fork o repositório
+2. Crie uma branch para sua feature (`git checkout -b feature/nova-funcionalidade`)
+3. Commit suas mudanças (`git commit -m 'Adiciona nova funcionalidade'`)
+4. Push para a branch (`git push origin feature/nova-funcionalidade`)
 5. Abra um Pull Request
 
 ## 📄 Licença
 
-Este projeto está sob a licença MIT. Veja o arquivo `LICENSE` para mais detalhes.
+Este projeto está licenciado sob a MIT License - veja o arquivo [LICENSE](LICENSE) para detalhes.
 
-## 🔗 Links Úteis
+## 🙏 Agradecimentos
 
-- **Lovable Project**: https://lovable.dev/projects/3ab1aed2-7716-4337-81db-4f510fe89c34
-- **Supabase**: https://supabase.com
-- **shadcn/ui**: https://ui.shadcn.com
-- **Tailwind CSS**: https://tailwindcss.com
+- **Supabase** - Backend as a Service
+- **Vercel** - Hospedagem e deployment
+- **Tailwind CSS** - Framework de CSS
+- **React** - Framework frontend
 
 ## 📞 Contato
 
@@ -292,4 +309,4 @@ Para dúvidas ou sugestões sobre o projeto, entre em contato através dos canai
 
 ---
 
-**Quentinhas Express** - Desenvolvido com ❤️ para o mercado brasileiro de food delivery.
+**Desenvolvido com ❤️ para revolucionar o delivery de comida no Brasil**

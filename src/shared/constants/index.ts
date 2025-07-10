@@ -41,7 +41,7 @@ export const APP_CONFIG = {
   DESCRIPTION: 'Plataforma SaaS para delivery de quentinhas',
   SUPPORT_EMAIL: 'suporte@quentinhas.com',
   COMPANY_NAME: 'Quentinhas Ltda',
-  BASE_DOMAIN: 'quentinhas.com',
+  BASE_DOMAIN: import.meta.env.DEV ? 'localhost' : 'quentinhas.com',
   
   // Limits
   MAX_FILE_SIZE: 5 * 1024 * 1024, // 5MB

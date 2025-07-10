@@ -19,20 +19,39 @@ const tenantCache = new Map<string, { tenant: Tenant; timestamp: number }>();
  * Extract subdomain from hostname
  */
 export function extractSubdomain(hostname: string): string | null {
+  console.log('🔍 Extracting subdomain from hostname:', hostname);
+  console.log('🔍 BASE_DOMAIN:', APP_CONFIG.BASE_DOMAIN);
+  
   // Remove www. if present
   const cleanHostname = hostname.replace(/^www\./, '');
+  console.log('🔍 Clean hostname:', cleanHostname);
   
   // Check if it's the main domain
   if (cleanHostname === APP_CONFIG.BASE_DOMAIN || cleanHostname === `www.${APP_CONFIG.BASE_DOMAIN}`) {
+    console.log('🔍 Is main domain, returning null');
     return null;
   }
   
   // Extract subdomain
   const parts = cleanHostname.split('.');
-  if (parts.length >= 3 && cleanHostname.endsWith(`.${APP_CONFIG.BASE_DOMAIN}`)) {
-    return parts[0];
+  console.log('🔍 Hostname parts:', parts);
+  
+  // For development with localhost, check if hostname has subdomain pattern
+  if (import.meta.env.DEV && APP_CONFIG.BASE_DOMAIN === 'localhost') {
+    // Pattern: subdomain.localhost or subdomain.localhost:port
+    if (parts.length >= 2 && parts[1] === 'localhost') {
+      console.log('🔍 Found subdomain (dev mode):', parts[0]);
+      return parts[0];
+    }
+  } else {
+    // Production pattern: subdomain.domain.com
+    if (parts.length >= 3 && cleanHostname.endsWith(`.${APP_CONFIG.BASE_DOMAIN}`)) {
+      console.log('🔍 Found subdomain (prod mode):', parts[0]);
+      return parts[0];
+    }
   }
   
+  console.log('🔍 No subdomain found, returning null');
   return null;
 }
 
@@ -84,12 +103,9 @@ export async function resolveTenantBySlug(slug: string): Promise<Tenant | null> 
     // Query database
     const { data, error } = await supabase
       .from('tenants')
-      .select(`
-        *,
-        tenant_settings (*)
-      `)
+      .select('*')
       .eq('slug', slug)
-      .eq('is_active', true)
+      .eq('status', 'active')
       .single();
 
     if (error) {
@@ -119,17 +135,17 @@ export async function resolveTenantBySlug(slug: string): Promise<Tenant | null> 
         country: data.address.country || 'Brasil'
       } : undefined,
       domain: data.domain,
-      status: data.is_active ? 'active' : 'inactive',
-      plan: data.plan_id || 'starter',
-      settings: data.tenant_settings ? {
-        restaurantName: data.tenant_settings.restaurant_name || data.name,
-        deliveryTime: data.tenant_settings.delivery_time || '30-45 min',
-        location: data.tenant_settings.location || data.address || '',
-        isOpen: data.tenant_settings.is_open ?? true,
-        deliveryFee: data.tenant_settings.delivery_fee || 5.00,
-        minimumOrder: data.tenant_settings.min_order_value || 15.00,
-        paymentMethods: data.tenant_settings.payment_methods || ['pix', 'cartao'],
-        workingHours: data.tenant_settings.business_hours || {
+      status: data.status,
+      plan: data.plan || 'starter',
+      settings: data.settings ? {
+        restaurantName: data.settings.restaurant_name || data.name,
+        deliveryTime: data.settings.delivery_time || '30-45 min',
+        location: data.settings.location || data.address || '',
+        isOpen: data.settings.is_open ?? true,
+        deliveryFee: data.settings.delivery_fee || 5.00,
+        minimumOrder: data.settings.min_order_value || 15.00,
+        paymentMethods: data.settings.payment_methods || ['pix', 'cartao'],
+        workingHours: data.settings.business_hours || {
           monday: { open: '08:00', close: '22:00', isOpen: true },
           tuesday: { open: '08:00', close: '22:00', isOpen: true },
           wednesday: { open: '08:00', close: '22:00', isOpen: true },
@@ -156,7 +172,7 @@ export async function resolveTenantBySlug(slug: string): Promise<Tenant | null> 
           sunday: { open: '08:00', close: '22:00', isOpen: false }
         }
       },
-      theme: data.tenant_settings?.theme || {
+      theme: data.theme || {
         colors: {
           primary: '#FF6B35',
           secondary: '#F7931E',
@@ -202,10 +218,7 @@ export async function getTenantById(id: string): Promise<Tenant | null> {
   try {
     const { data, error } = await supabase
       .from('tenants')
-      .select(`
-        *,
-        tenant_settings (*)
-      `)
+      .select('*')
       .eq('id', id)
       .single();
 
@@ -227,17 +240,17 @@ export async function getTenantById(id: string): Promise<Tenant | null> {
         country: data.address.country || 'Brasil'
       } : undefined,
       domain: data.domain,
-      status: data.is_active ? 'active' : 'inactive',
-      plan: data.plan_id || 'starter',
-      settings: data.tenant_settings ? {
-        restaurantName: data.tenant_settings.restaurant_name || data.name,
-        deliveryTime: data.tenant_settings.delivery_time || '30-45 min',
-        location: data.tenant_settings.location || data.address || '',
-        isOpen: data.tenant_settings.is_open ?? true,
-        deliveryFee: data.tenant_settings.delivery_fee || 5.00,
-        minimumOrder: data.tenant_settings.min_order_value || 15.00,
-        paymentMethods: data.tenant_settings.payment_methods || ['pix', 'cartao'],
-        workingHours: data.tenant_settings.business_hours || {
+      status: data.status,
+      plan: data.plan || 'starter',
+      settings: data.settings ? {
+        restaurantName: data.settings.restaurant_name || data.name,
+        deliveryTime: data.settings.delivery_time || '30-45 min',
+        location: data.settings.location || data.address || '',
+        isOpen: data.settings.is_open ?? true,
+        deliveryFee: data.settings.delivery_fee || 5.00,
+        minimumOrder: data.settings.min_order_value || 15.00,
+        paymentMethods: data.settings.payment_methods || ['pix', 'cartao'],
+        workingHours: data.settings.business_hours || {
           monday: { open: '08:00', close: '22:00', isOpen: true },
           tuesday: { open: '08:00', close: '22:00', isOpen: true },
           wednesday: { open: '08:00', close: '22:00', isOpen: true },
@@ -264,7 +277,7 @@ export async function getTenantById(id: string): Promise<Tenant | null> {
           sunday: { open: '08:00', close: '22:00', isOpen: false }
         }
       },
-      theme: data.tenant_settings?.theme || {
+      theme: data.theme || {
         colors: {
           primary: '#FF6B35',
           secondary: '#F7931E',
@@ -295,13 +308,13 @@ export async function updateTenantSettings(
 ): Promise<TenantSettings | null> {
   try {
     const { data, error } = await supabase
-      .from('tenant_settings')
+      .from('tenants')
       .update({
-        ...settings,
+        settings: settings,
         updated_at: new Date().toISOString()
       })
-      .eq('tenant_id', tenantId)
-      .select()
+      .eq('id', tenantId)
+      .select('settings')
       .single();
 
     if (error || !data) {
@@ -314,7 +327,7 @@ export async function updateTenantSettings(
       tenantCache.delete(tenant.slug);
     }
 
-    return data;
+    return data.settings;
   } catch (error) {
     console.error('Error updating tenant settings:', error);
     throw error;
