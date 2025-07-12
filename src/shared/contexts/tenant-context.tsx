@@ -1,82 +1,102 @@
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
-import type { Tenant } from '../types';
-import { resolveCurrentTenant, clearTenantCache } from '../../services/tenant/tenant-resolver';
-import { loadTenantTheme } from '../../services/theme/theme-service';
-import { ERROR_MESSAGES } from '../constants';
+import { Tenant } from '../types';
+import { 
+  extractSubdomain, 
+  getCurrentSubdomain, 
+  resolveTenantBySlug,
+  isTenantDomain 
+} from '../../services/tenant/tenant-resolver';
 
 interface TenantContextType {
   tenant: Tenant | null;
   isLoading: boolean;
   error: string | null;
+  isTenantDomain: boolean;
+  subdomain: string | null;
   refreshTenant: () => Promise<void>;
-  clearCache: () => void;
+  setTenant: (tenant: Tenant | null) => void;
 }
 
 const TenantContext = createContext<TenantContextType | undefined>(undefined);
 
 interface TenantProviderProps {
   children: ReactNode;
-  fallback?: ReactNode;
-  errorFallback?: ReactNode;
 }
 
-export function TenantProvider({ children, fallback, errorFallback }: TenantProviderProps) {
+export function TenantProvider({ children }: TenantProviderProps) {
   const [tenant, setTenant] = useState<Tenant | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [subdomain, setSubdomain] = useState<string | null>(null);
+  const [isTenantDomainState, setIsTenantDomainState] = useState(false);
 
-  const loadTenant = async () => {
+  const refreshTenant = async () => {
     try {
       setIsLoading(true);
       setError(null);
-      
-      const resolvedTenant = await resolveCurrentTenant();
-      setTenant(resolvedTenant);
-      
-      // Apply tenant theme if available
-      if (resolvedTenant?.theme) {
-        await loadTenantTheme(resolvedTenant.id, resolvedTenant.theme);
+
+      const currentSubdomain = getCurrentSubdomain();
+      setSubdomain(currentSubdomain);
+      setIsTenantDomainState(!!currentSubdomain);
+
+      if (currentSubdomain) {
+        console.log('🏢 Resolvendo tenant para subdomain:', currentSubdomain);
+        const resolvedTenant = await resolveTenantBySlug(currentSubdomain);
+        
+        if (resolvedTenant) {
+          console.log('✅ Tenant encontrado:', resolvedTenant.name);
+          setTenant(resolvedTenant);
+        } else {
+          console.log('❌ Tenant não encontrado para:', currentSubdomain);
+          setError('Restaurante não encontrado');
+          setTenant(null);
+        }
+      } else {
+        console.log('🌐 Domínio principal - sem tenant');
+        setTenant(null);
       }
-      
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : ERROR_MESSAGES.TENANT_NOT_FOUND;
-      setError(errorMessage);
-      console.error('Error loading tenant:', err);
+      console.error('❌ Erro ao resolver tenant:', err);
+      setError(err instanceof Error ? err.message : 'Erro desconhecido');
+      setTenant(null);
     } finally {
       setIsLoading(false);
     }
   };
 
-  const refreshTenant = async () => {
-    await loadTenant();
-  };
-
-  const clearCache = () => {
-    clearTenantCache();
-    if (tenant) {
-      clearTenantCache(tenant.slug);
-    }
-  };
-
+  // Resolver tenant na inicialização
   useEffect(() => {
-    loadTenant();
+    refreshTenant();
   }, []);
+
+  // Escutar mudanças no hostname (para desenvolvimento)
+  useEffect(() => {
+    const handleLocationChange = () => {
+      const newSubdomain = getCurrentSubdomain();
+      if (newSubdomain !== subdomain) {
+        console.log('🔄 Hostname mudou, recarregando tenant...');
+        refreshTenant();
+      }
+    };
+
+    // Escutar mudanças de URL
+    window.addEventListener('popstate', handleLocationChange);
+    
+    // Cleanup
+    return () => {
+      window.removeEventListener('popstate', handleLocationChange);
+    };
+  }, [subdomain]);
 
   const contextValue: TenantContextType = {
     tenant,
     isLoading,
     error,
+    isTenantDomain: isTenantDomainState,
+    subdomain,
     refreshTenant,
-    clearCache
+    setTenant
   };
-
-  if (isLoading && fallback) {
-    return <>{fallback}</>;
-  }
-
-  if (error && errorFallback) {
-    return <>{errorFallback}</>;
-  }
 
   return (
     <TenantContext.Provider value={contextValue}>
@@ -85,76 +105,83 @@ export function TenantProvider({ children, fallback, errorFallback }: TenantProv
   );
 }
 
-export function useTenant(): TenantContextType {
+export function useTenant() {
   const context = useContext(TenantContext);
   if (context === undefined) {
-    throw new Error('useTenant must be used within a TenantProvider');
+    throw new Error('useTenant deve ser usado dentro de um TenantProvider');
   }
   return context;
 }
 
-// Hook for checking if we're in a tenant context
-export function useIsTenantContext(): boolean {
-  const { tenant } = useTenant();
-  return tenant !== null;
+// Hook para verificar se estamos em um domínio de tenant
+export function useIsTenantDomain() {
+  const { isTenantDomain } = useTenant();
+  return isTenantDomain;
 }
 
-// Hook for getting tenant settings with defaults
+// Hook para obter apenas o tenant atual
+export function useCurrentTenant() {
+  const { tenant, isLoading, error } = useTenant();
+  return { tenant, isLoading, error };
+}
+
+// Hook para obter o subdomain atual
+export function useSubdomain() {
+  const { subdomain } = useTenant();
+  return subdomain;
+}
+
+// Hook para ações do tenant
+export function useTenantActions() {
+  const { refreshTenant, setTenant } = useTenant();
+  return { refreshTenant, setTenant };
+}
+
+// Hook para configurações do tenant
 export function useTenantSettings() {
   const { tenant } = useTenant();
   
-  return {
-    settings: tenant?.settings || {
-      restaurantName: 'Restaurante',
-      deliveryTime: '30-45 min',
-      location: '',
-      isOpen: true,
-      deliveryFee: 5.00,
-      minimumOrder: 15.00,
-      paymentMethods: ['pix', 'cartao'],
-      workingHours: {
-        monday: { open: '08:00', close: '22:00', isOpen: true },
-        tuesday: { open: '08:00', close: '22:00', isOpen: true },
-        wednesday: { open: '08:00', close: '22:00', isOpen: true },
-        thursday: { open: '08:00', close: '22:00', isOpen: true },
-        friday: { open: '08:00', close: '22:00', isOpen: true },
-        saturday: { open: '08:00', close: '22:00', isOpen: true },
-        sunday: { open: '08:00', close: '22:00', isOpen: false }
-      }
+  // Configurações padrão se não houver tenant
+  const defaultSettings = {
+    isOpen: true,
+    openingHours: {
+      monday: { open: '08:00', close: '18:00', closed: false },
+      tuesday: { open: '08:00', close: '18:00', closed: false },
+      wednesday: { open: '08:00', close: '18:00', closed: false },
+      thursday: { open: '08:00', close: '18:00', closed: false },
+      friday: { open: '08:00', close: '18:00', closed: false },
+      saturday: { open: '08:00', close: '16:00', closed: false },
+      sunday: { open: '08:00', close: '16:00', closed: false }
     },
-    isRestaurantOpen: () => {
-      if (!tenant?.settings) return true;
-      
-      const now = new Date();
-      const dayName = now.toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();
-      const currentTime = now.toTimeString().slice(0, 5); // HH:MM format
-      
-      const daySchedule = tenant.settings.workingHours[dayName];
-      if (!daySchedule || !daySchedule.isOpen) return false;
-      
-      return currentTime >= daySchedule.open && currentTime <= daySchedule.close;
-    }
+    deliveryFee: 5.00,
+    minimumOrder: 20.00,
+    acceptsOnlinePayment: true,
+    acceptsCash: true
   };
-}
 
-// Hook for getting tenant theme
-export function useTenantTheme() {
-  const { tenant } = useTenant();
+  const settings = tenant?.settings || defaultSettings;
   
+  // Verificar se o restaurante está aberto baseado no horário atual
+  const isRestaurantOpen = () => {
+    if (!settings.isOpen) return false;
+    
+    const now = new Date();
+    const currentDay = now.toLocaleLowerCase().substring(0, 3) +
+      now.toLocaleLowerCase().substring(3);
+    const dayKey = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'][now.getDay()];
+    
+    const daySchedule = (settings as any).openingHours?.[dayKey];
+    if (daySchedule?.closed) return false;
+    
+    const currentTime = now.getHours() * 100 + now.getMinutes();
+    const openTime = parseInt(daySchedule?.open?.replace(':', '') || '0');
+    const closeTime = parseInt(daySchedule?.close?.replace(':', '') || '2359');
+    
+    return currentTime >= openTime && currentTime <= closeTime;
+  };
+
   return {
-    theme: tenant?.theme || {
-      colors: {
-        primary: '#FF6B35',
-        secondary: '#F7931E',
-        accent: '#FFD23F',
-        background: '#FFFFFF'
-      },
-      logo: '',
-      fonts: {
-        primary: 'Inter',
-        secondary: 'Inter'
-      }
-    },
-    hasCustomTheme: !!tenant?.theme
+    settings,
+    isRestaurantOpen: isRestaurantOpen()
   };
 }

@@ -2,9 +2,11 @@
 export {
   TenantProvider,
   useTenant,
-  useIsTenantContext,
-  useTenantSettings,
-  useTenantTheme
+  useIsTenantDomain,
+  useCurrentTenant,
+  useSubdomain,
+  useTenantActions,
+  useTenantSettings
 } from './tenant-context';
 
 // Auth Context
@@ -22,22 +24,16 @@ import { AuthProvider } from './auth-context';
 
 interface AppProvidersProps {
   children: React.ReactNode;
-  tenantFallback?: React.ReactNode;
-  tenantErrorFallback?: React.ReactNode;
 }
 
 export function AppProviders({
-  children,
-  tenantFallback,
-  tenantErrorFallback
+  children
 }: AppProvidersProps) {
   return React.createElement(
     AuthProvider,
     { children: React.createElement(
       TenantProvider,
       {
-        fallback: tenantFallback,
-        errorFallback: tenantErrorFallback,
         children: children
       }
     )}

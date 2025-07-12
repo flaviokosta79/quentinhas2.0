@@ -5,14 +5,11 @@ import { extractSubdomain, isTenantDomain } from './services/tenant/tenant-resol
 import { ROUTES } from './shared/constants';
 
 // Import different applications
-import Index from './pages/Index';
+import LandingApp from './apps/landing/LandingApp';
 import RestaurantPage from './pages/RestaurantPage';
 import RestaurantAdminApp from './apps/restaurant-admin/RestaurantAdminApp';
 // import AdminApp from './apps/admin/AdminApp';
 // import OnboardingApp from './apps/onboarding/OnboardingApp';
-
-// Use the original Index page as Landing App
-const LandingApp = Index;
 // Use the new RestaurantPage for tenant subdomains
 const RestaurantApp = RestaurantPage;
 const AdminApp = () => <div>Admin App - Coming Soon</div>;
@@ -76,10 +73,7 @@ function AppRouter() {
   return (
     <ErrorBoundary>
       <BrowserRouter>
-        <AppProviders
-          tenantFallback={<LoadingSpinner />}
-          tenantErrorFallback={<TenantErrorFallback />}
-        >
+        <AppProviders>
           <AppContent appType={appType} />
         </AppProviders>
       </BrowserRouter>
@@ -187,13 +181,13 @@ function TenantNotFoundError() {
         </p>
         <div className="space-y-3">
           <a
-            href={`${window.location.protocol}//${process.env.REACT_APP_BASE_DOMAIN || 'quentinhas.com'}`}
+            href={`${window.location.protocol}//${import.meta.env.VITE_BASE_DOMAIN || 'quentinhas.com'}`}
             className="block bg-orange-500 hover:bg-orange-600 text-white px-6 py-2 rounded-lg transition-colors"
           >
             Ir para página principal
           </a>
           <a
-            href={`${window.location.protocol}//onboarding.${process.env.REACT_APP_BASE_DOMAIN || 'quentinhas.com'}`}
+            href={`${window.location.protocol}//onboarding.${import.meta.env.VITE_BASE_DOMAIN || 'quentinhas.com'}`}
             className="block border border-orange-500 text-orange-500 hover:bg-orange-50 px-6 py-2 rounded-lg transition-colors"
           >
             Cadastrar meu restaurante
@@ -221,7 +215,7 @@ function TenantInactiveError({ tenant }: { tenant: { name: string; email?: strin
         </p>
         <div className="space-y-3">
           <a
-            href={`${window.location.protocol}//${process.env.REACT_APP_BASE_DOMAIN || 'quentinhas.com'}`}
+            href={`${window.location.protocol}//${import.meta.env.VITE_BASE_DOMAIN || 'quentinhas.com'}`}
             className="block bg-orange-500 hover:bg-orange-600 text-white px-6 py-2 rounded-lg transition-colors"
           >
             Ir para página principal
